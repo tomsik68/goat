@@ -1,6 +1,7 @@
 package importer
 
 import (
+	"io"
 	"github.com/goat-project/goat-proto-go"
 )
 
@@ -14,13 +15,61 @@ func NewAccountingServiceImpl() AccountingServiceImpl {
 }
 
 func (asi *AccountingServiceImpl) ProcessVms(stream goat_grpc.AccountingService_ProcessVmsServer) error {
-	return nil
+	for {
+		_, err := stream.Recv()
+		// TODO client identifier validation
+
+		if err == io.EOF {
+			return stream.SendAndClose(&goat_grpc.Confirmation{
+				Accepted: true,
+				Msg: "ok",
+			})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// TODO process data
+	}
 }
 
 func (asi *AccountingServiceImpl) ProcessIps(stream goat_grpc.AccountingService_ProcessIpsServer) error {
-	return nil
+	for {
+		_, err := stream.Recv()
+		// TODO client identifier validation
+
+		if err == io.EOF {
+			return stream.SendAndClose(&goat_grpc.Confirmation{
+				Accepted: true,
+				Msg: "ok",
+			})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// TODO process data
+	}
 }
 
 func (asi *AccountingServiceImpl) ProcessStorage(stream goat_grpc.AccountingService_ProcessStorageServer) error {
-	return nil
+	for {
+		_, err := stream.Recv()
+		// TODO client identifier validation
+
+		if err == io.EOF {
+			return stream.SendAndClose(&goat_grpc.Confirmation{
+				Accepted: true,
+				Msg: "ok",
+			})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// TODO process data
+	}
 }
