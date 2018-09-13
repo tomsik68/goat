@@ -2,13 +2,12 @@ package main
 
 import (
 	"flag"
-	"log"
-	"net"
+	"fmt"
 	"github.com/goat-project/goat/importer"
-	"github.com/goat-project/goat-proto-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"fmt"
+	"log"
+	"net"
 )
 
 // CLI option names
@@ -44,8 +43,11 @@ func startServer() error {
 	}
 
 	grpcServer := grpc.NewServer(opts...)
+	acceptAll := func(_ string) bool {
+		return true
+	}
 
-	importer.NewAccountingServiceImpl()
+	importer.NewAccountingServiceImpl(acceptAll)
 	return grpcServer.Serve(server)
 }
 
