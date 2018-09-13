@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/goat-project/goat/importer"
+	"github.com/tomsik68/goat/importer"
 	"github.com/goat-project/goat-proto-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
