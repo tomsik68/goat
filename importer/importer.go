@@ -10,12 +10,18 @@ type ClientIdentifierValidator func(identifier string) bool
 
 // AccountingServiceImpl implements goat_grpc.AccountingService server
 type AccountingServiceImpl struct {
+	vmConsumer                chan<- *goat_grpc.VmRecord
+	ipConsumer                chan<- *goat_grpc.IpRecord
+	storageConsumer           chan<- *goat_grpc.StorageRecord
 	clientIdentifierValidator ClientIdentifierValidator
 }
 
-// NewAccountingServiceImpl creates a grpc server
-func NewAccountingServiceImpl(identifierValidator ClientIdentifierValidator) AccountingServiceImpl {
+// NewAccountingServiceImpl creates a grpc server that sends received data to given channels and uses clientIdentifierValidator to validate client identifiers
+func NewAccountingServiceImpl(vms chan<- *goat_grpc.VmRecord, ips chan<- *goat_grpc.IpRecord, storages chan<- *goat_grpc.StorageRecord, identifierValidator ClientIdentifierValidator) AccountingServiceImpl {
 	return AccountingServiceImpl{
+		vmConsumer:                vms,
+		ipConsumer:                ips,
+		storageConsumer:           storages,
 		clientIdentifierValidator: identifierValidator,
 	}
 }
@@ -41,7 +47,10 @@ func (asi *AccountingServiceImpl) ProcessVms(stream goat_grpc.AccountingService_
 			return err
 		}
 
-		// TODO process data
+		vms := data.Vms
+		for _, vm := range vms {
+			asi.vmConsumer <- vm
+		}
 	}
 }
 
@@ -66,7 +75,10 @@ func (asi *AccountingServiceImpl) ProcessIps(stream goat_grpc.AccountingService_
 			return err
 		}
 
-		// TODO process data
+		ips := data.Ips
+		for _, ip := range ips {
+			asi.ipConsumer <- ip
+		}
 	}
 }
 
@@ -91,6 +103,9 @@ func (asi *AccountingServiceImpl) ProcessStorage(stream goat_grpc.AccountingServ
 			return err
 		}
 
-		// TODO process data
+		storages := data.Storages
+		for _, storage := range storages {
+			asi.storageConsumer <- storage
+		}
 	}
 }

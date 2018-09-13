@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/goat-project/goat/importer"
+	"github.com/goat-project/goat-proto-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"log"
@@ -43,11 +44,14 @@ func startServer() error {
 	}
 
 	grpcServer := grpc.NewServer(opts...)
+	vms := make(chan *goat_grpc.VmRecord, 32)
+	ips := make(chan *goat_grpc.IpRecord, 32)
+	storages := make(chan *goat_grpc.StorageRecord, 32)
 	acceptAll := func(_ string) bool {
 		return true
 	}
 
-	importer.NewAccountingServiceImpl(acceptAll)
+	importer.NewAccountingServiceImpl(vms, ips, storages, acceptAll)
 	return grpcServer.Serve(server)
 }
 
