@@ -1,0 +1,11 @@
+[[constraint]]
+name = "github.com/goat-project/goat-proto-go"
+
+[[constraint]]
+name = "google.golang.org/grpc"
+
+[[constraint]]
+name = "github.com/golang/protobuf"
+
+[[constraint]]
+name = "gopkg.in/yaml.v2"
