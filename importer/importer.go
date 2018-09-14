@@ -35,9 +35,7 @@ func (asi *AccountingServiceImpl) ProcessVms(stream goat_grpc.AccountingService_
 			return err
 		}
 
-		for _, vm := range data.Vms {
-			asi.vmConsumer <- vm
-		}
+		asi.vmConsumer <- data.Vm
 	}
 }
 
@@ -54,9 +52,7 @@ func (asi *AccountingServiceImpl) ProcessIps(stream goat_grpc.AccountingService_
 			return err
 		}
 
-		for _, ip := range data.Ips {
-			asi.ipConsumer <- ip
-		}
+		asi.ipConsumer <- data.Ip
 	}
 }
 
@@ -73,8 +69,6 @@ func (asi *AccountingServiceImpl) ProcessStorage(stream goat_grpc.AccountingServ
 			return err
 		}
 
-		for _, storage := range data.Storages {
-			asi.storageConsumer <- storage
-		}
+		asi.storageConsumer <- data.Storage
 	}
 }
