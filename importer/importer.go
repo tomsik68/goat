@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/goat-project/goat-proto-go"
+	"github.com/goat-project/goat/common"
 	"github.com/goat-project/goat/consumer"
 	"github.com/golang/protobuf/ptypes/empty"
 	"io"
@@ -48,6 +49,25 @@ func (asi AccountingServiceImpl) receiveIdentifier(stream goat_grpc.AccountingSe
 	}
 }
 
+func (asi AccountingServiceImpl) startConsumers(ctx context.Context, id string, vms <-chan goat_grpc.VmRecord, ips <-chan goat_grpc.IpRecord, storages <-chan goat_grpc.StorageRecord) (common.DoneChannel, error) {
+	done1, err := asi.vmConsumer.ConsumeVms(ctx, id, vms)
+	if err != nil {
+		return nil, err
+	}
+
+	done2, err := asi.ipConsumer.ConsumeIps(ctx, id, ips)
+	if err != nil {
+		return nil, err
+	}
+
+	done3, err := asi.storageConsumer.ConsumeStorages(ctx, id, storages)
+	if err != nil {
+		return nil, err
+	}
+
+	return common.AndDone(done1, done2, done3), nil
+}
+
 // Process is a GRPC call -- do not use!
 func (asi AccountingServiceImpl) Process(stream goat_grpc.AccountingService_ProcessServer) error {
 	id, err := asi.receiveIdentifier(stream)
@@ -55,7 +75,7 @@ func (asi AccountingServiceImpl) Process(stream goat_grpc.AccountingService_Proc
 		return err
 	}
 
-	consumerContext := context.TODO()
+	consumerContext, cancelConsumers := context.WithCancel(context.Background())
 
 	// prepare channels for individual data types
 	vms := make(chan goat_grpc.VmRecord)
@@ -66,10 +86,13 @@ func (asi AccountingServiceImpl) Process(stream goat_grpc.AccountingService_Proc
 	defer close(vms)
 	defer close(ips)
 	defer close(storages)
+	defer cancelConsumers()
 
-	asi.vmConsumer.ConsumeVms(consumerContext, id, vms)
-	asi.ipConsumer.ConsumeIps(consumerContext, id, ips)
-	asi.storageConsumer.ConsumeStorages(consumerContext, id, storages)
+	done, err := asi.startConsumers(consumerContext, id, vms, ips, storages)
+	if err != nil {
+		return err
+	}
+	<-done
 
 	for {
 		data, err := stream.Recv()
