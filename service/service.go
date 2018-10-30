@@ -29,7 +29,8 @@ func Serve(ip *string, port *uint, tls *bool, certFile *string, keyFile *string,
 	grpcServer := grpc.NewServer(opts...)
 
 	wr := consumer.NewWriter(*outDir, *templatesDir)
-	goat_grpc.RegisterAccountingServiceServer(grpcServer, importer.NewAccountingServiceImpl(wr, wr, wr))
+	ic := consumer.NewIPJSONConsumer(*outDir)
+	goat_grpc.RegisterAccountingServiceServer(grpcServer, importer.NewAccountingServiceImpl(wr, ic, wr))
 
 	return grpcServer.Serve(server)
 }
