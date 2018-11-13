@@ -63,31 +63,64 @@ func (wc WriterConsumer) processTo(record interface{}, wr io.Writer) error {
 func (wc WriterConsumer) writeIP(id string, ip goat_grpc.IpRecord) error {
 
 	file, err := os.Open(path.Join(path.Join(wc.dir, id), getIPFileName(ip)))
+	defer func() {
+		cerr := file.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+
 	if err != nil {
 		return err
 	}
 
-	return wc.processTo(ip, file)
+	if err = wc.processTo(ip, file); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (wc WriterConsumer) writeVM(id string, vm goat_grpc.VmRecord) error {
 
 	file, err := os.Open(path.Join(path.Join(wc.dir, id), getVMFileName(vm)))
+	defer func() {
+		cerr := file.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+
 	if err != nil {
 		return err
 	}
 
-	return wc.processTo(vm, file)
+	if err = wc.processTo(vm, file); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (wc WriterConsumer) writeStorage(id string, storage goat_grpc.StorageRecord) error {
 
 	file, err := os.Open(path.Join(path.Join(wc.dir, id), getStorageFileName(storage)))
+	defer func() {
+		cerr := file.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+
 	if err != nil {
 		return err
 	}
 
-	return wc.processTo(storage, file)
+	if err = wc.processTo(storage, file); err != nil {
+		return err
+	}
+
+	return err
 }
 
 // ConsumeIps transforms IpRecord-s into text and writes them to a subdirectory of dir specified by WriterConsumer's dir field. Each IpRecord is written to its own file.
