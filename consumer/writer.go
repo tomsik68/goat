@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	"github.com/goat-project/goat-proto-go"
 	"io"
 	"os"
@@ -60,30 +61,21 @@ func (wc WriterConsumer) processTo(record interface{}, wr io.Writer) error {
 	return wc.template.Execute(wr, record)
 }
 
-func (wc WriterConsumer) writeIP(id string, ip goat_grpc.IpRecord) error {
-
-	file, err := os.Open(path.Join(path.Join(wc.dir, id), getIPFileName(ip)))
-	defer func() {
-		cerr := file.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-
-	if err != nil {
-		return err
+func getRecordFileName(record interface{}) string {
+	switch record.(type) {
+	case goat_grpc.IpRecord:
+		return getIPFileName(record.(goat_grpc.IpRecord))
+	case goat_grpc.VmRecord:
+		return getVMFileName(record.(goat_grpc.VmRecord))
+	case goat_grpc.StorageRecord:
+		return getStorageFileName(record.(goat_grpc.StorageRecord))
 	}
-
-	if err = wc.processTo(ip, file); err != nil {
-		return err
-	}
-
-	return err
+	panic(fmt.Sprintf("getRecordFileName called with unknown record type"))
 }
 
-func (wc WriterConsumer) writeVM(id string, vm goat_grpc.VmRecord) error {
+func (wc WriterConsumer) write(id string, record interface{}) error {
 
-	file, err := os.Open(path.Join(path.Join(wc.dir, id), getVMFileName(vm)))
+	file, err := os.Open(path.Join(path.Join(wc.dir, id), getRecordFileName(record)))
 	defer func() {
 		cerr := file.Close()
 		if err == nil {
@@ -95,28 +87,7 @@ func (wc WriterConsumer) writeVM(id string, vm goat_grpc.VmRecord) error {
 		return err
 	}
 
-	if err = wc.processTo(vm, file); err != nil {
-		return err
-	}
-
-	return err
-}
-
-func (wc WriterConsumer) writeStorage(id string, storage goat_grpc.StorageRecord) error {
-
-	file, err := os.Open(path.Join(path.Join(wc.dir, id), getStorageFileName(storage)))
-	defer func() {
-		cerr := file.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-
-	if err != nil {
-		return err
-	}
-
-	if err = wc.processTo(storage, file); err != nil {
+	if err = wc.processTo(record, file); err != nil {
 		return err
 	}
 
@@ -141,7 +112,7 @@ func (wc WriterConsumer) ConsumeIps(ctx context.Context, id string, ips <-chan g
 		for {
 			select {
 			case ip := <-ips:
-				r := NewResultFromError(wc.writeIP(id, ip))
+				r := NewResultFromError(wc.write(id, ip))
 				res <- r
 			case <-ctx.Done():
 				return
@@ -171,7 +142,7 @@ func (wc WriterConsumer) ConsumeVms(ctx context.Context, id string, vms <-chan g
 		for {
 			select {
 			case vm := <-vms:
-				r := NewResultFromError(wc.writeVM(id, vm))
+				r := NewResultFromError(wc.write(id, vm))
 				res <- r
 			case <-ctx.Done():
 				return
@@ -201,7 +172,7 @@ func (wc WriterConsumer) ConsumeStorages(ctx context.Context, id string, sts <-c
 		for {
 			select {
 			case st := <-sts:
-				r := NewResultFromError(wc.writeStorage(id, st))
+				r := NewResultFromError(wc.write(id, st))
 				res <- r
 			case <-ctx.Done():
 				return
