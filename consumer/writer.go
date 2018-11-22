@@ -94,8 +94,7 @@ func (wc WriterConsumer) write(id string, record interface{}) error {
 	return err
 }
 
-// ConsumeIps transforms IpRecord-s into text and writes them to a subdirectory of dir specified by WriterConsumer's dir field. Each IpRecord is written to its own file.
-func (wc WriterConsumer) ConsumeIps(ctx context.Context, id string, ips <-chan goat_grpc.IpRecord) (ResultsChannel, error) {
+func (wc WriterConsumer) consume(ctx context.Context, id string, ch <-chan interface{}) (ResultsChannel, error) {
 	res := make(chan Result)
 
 	if err := ensureDirectoryExists(path.Join(wc.dir, id)); err != nil {
@@ -111,8 +110,8 @@ func (wc WriterConsumer) ConsumeIps(ctx context.Context, id string, ips <-chan g
 
 		for {
 			select {
-			case ip := <-ips:
-				r := NewResultFromError(wc.write(id, ip))
+			case record := <-ch:
+				r := NewResultFromError(wc.write(id, record))
 				res <- r
 			case <-ctx.Done():
 				return
@@ -122,64 +121,19 @@ func (wc WriterConsumer) ConsumeIps(ctx context.Context, id string, ips <-chan g
 	}()
 
 	return res, nil
+}
+
+// ConsumeIps transforms IpRecord-s into text and writes them to a subdirectory of dir specified by WriterConsumer's dir field. Each IpRecord is written to its own file.
+func (wc WriterConsumer) ConsumeIps(ctx context.Context, id string, ips <-chan goat_grpc.IpRecord) (ResultsChannel, error) {
+	return wc.consume(ctx, id, ips)
 }
 
 // ConsumeVms transforms VmRecord-s into text and writes them to a subdirectory of dir specified by WriterConsumer's dir field. Each VmRecord is written to its own file.
 func (wc WriterConsumer) ConsumeVms(ctx context.Context, id string, vms <-chan goat_grpc.VmRecord) (ResultsChannel, error) {
-	res := make(chan Result)
-
-	if err := ensureDirectoryExists(path.Join(wc.dir, id)); err != nil {
-		return nil, err
-	}
-
-	if err := wc.initTemplates(); err != nil {
-		return nil, err
-	}
-
-	go func() {
-		defer close(res)
-
-		for {
-			select {
-			case vm := <-vms:
-				r := NewResultFromError(wc.write(id, vm))
-				res <- r
-			case <-ctx.Done():
-				return
-			}
-		}
-
-	}()
-
-	return res, nil
+	return wc.consume(ctx, id, vms)
 }
 
 // ConsumeStorages transforms StorageRecord-s into text and writes them to a subdirectory of dir specified by WriterConsumer's dir field. Each StorageRecord is written to its own file.
 func (wc WriterConsumer) ConsumeStorages(ctx context.Context, id string, sts <-chan goat_grpc.StorageRecord) (ResultsChannel, error) {
-	res := make(chan Result)
-
-	if err := ensureDirectoryExists(path.Join(wc.dir, id)); err != nil {
-		return nil, err
-	}
-
-	if err := wc.initTemplates(); err != nil {
-		return nil, err
-	}
-
-	go func() {
-		defer close(res)
-
-		for {
-			select {
-			case st := <-sts:
-				r := NewResultFromError(wc.write(id, st))
-				res <- r
-			case <-ctx.Done():
-				return
-			}
-		}
-
-	}()
-
-	return res, nil
+	return wc.consume(ctx, id, sts)
 }
