@@ -11,8 +11,6 @@ import (
 
 const (
 	templateFileExtension = "tmpl"
-	outFileExtension      = "apel"
-	vmTemplateName        = "VM"
 )
 
 // TemplateGroupWriter converts each record to template and writes it to file. Multiple records may be written into a single file.
@@ -20,15 +18,19 @@ type TemplateGroupWriter struct {
 	dir          string
 	templatesDir string
 	countPerFile uint64
+	templateName string
+	outExtension string
 	template     *template.Template
 }
 
 // NewTemplateGroupWriter creates a new TemplateGroupWriter.
-func NewTemplateGroupWriter(dir, templatesDir string, countPerFile uint64) TemplateGroupWriter {
+func NewTemplateGroupWriter(dir, templatesDir, templateName, outExtension string, countPerFile uint64) TemplateGroupWriter {
 	return TemplateGroupWriter{
 		dir:          dir,
 		templatesDir: templatesDir,
 		countPerFile: countPerFile,
+		templateName: templateName,
+		outExtension: outExtension,
 		template:     nil,
 	}
 }
@@ -78,7 +80,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 	}
 
 	// open the initial file
-	file, err := os.Open(path.Join(tgw.dir, path.Join(id, "0.apel")))
+	file, err := os.Open(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("0.%s", tgw.outExtension))))
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 			select {
 			case templateData := <-records:
 				// write templateData to file
-				err := tgw.template.ExecuteTemplate(file, vmTemplateName, templateData)
+				err := tgw.template.ExecuteTemplate(file, tgw.templateName, templateData)
 				if err != nil {
 					trySendError(ctx, res, err)
 					return
@@ -122,7 +124,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 					filenameCounter++
 
 					// open next file
-					file, err = os.Open(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("%d.%s", filenameCounter, outFileExtension))))
+					file, err = os.Open(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("%d.%s", filenameCounter, tgw.outExtension))))
 					if err != nil {
 						trySendError(ctx, res, err)
 						// exit on error
