@@ -1,0 +1,30 @@
+{{define "VM"}}
+APEL-cloud-message: v0.4
+VMUUID: {{.VMUUID}}
+SiteName: {{.SiteName}}
+CloudComputeService: {{.CloudComputeService}}
+MachineName: {{.MachineName}}
+LocalUserId: {{.LocalUserID}}
+LocalGroupId: {{.LocalGroupID}}
+GlobalUserName: {{.GlobalUserName}}
+FQAN: {{.Fqan}}
+Status: {{.Status}}
+StartTime: {{.StartTime}}
+EndTime: {{.EndTime}}
+SuspendDuration: {{.SuspendDuration}}
+WallDuration: {{.WallDuration}}
+CpuDuration: {{.CPUDuration}}
+CpuCount: {{.CPUCount}}
+NetworkType: {{.NetworkType}}
+NetworkInbound: {{.NetworkInbound}}
+NetworkOutbound: {{.NetworkOutbound}}
+PublicIPCount: {{.PublicIPCount}}
+Memory: {{.Memory}}
+Disk: {{.Disk}}
+StorageRecordId: {{.StorageRecordId}}
+ImageId: {{.ImageID}}
+CloudType: {{.CloudType}}
+BenchmarkType: {{.BenkmarkType}}
+Benchmark: {{.Benchmark}}
+%%
+{{end}}
