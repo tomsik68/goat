@@ -99,7 +99,11 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 		countInFile, filenameCounter = 0, 0
 		for {
 			select {
-			case templateData := <-records:
+			case templateData, ok := <-records:
+				if !ok {
+					// end of stream
+					return
+				}
 				// write templateData to file
 				err := tgw.template.ExecuteTemplate(file, tgw.templateName, templateData)
 				if err != nil {
