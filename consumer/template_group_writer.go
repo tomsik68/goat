@@ -80,7 +80,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 	}
 
 	// open the initial file
-	file, err := os.Open(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("0.%s", tgw.outExtension))))
+	file, err := os.Create(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("0.%s", tgw.outExtension))))
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 					filenameCounter++
 
 					// open next file
-					file, err = os.Open(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("%d.%s", filenameCounter, tgw.outExtension))))
+					file, err = os.Create(path.Join(tgw.dir, path.Join(id, fmt.Sprintf("%d.%s", filenameCounter, tgw.outExtension))))
 					if err != nil {
 						trySendError(ctx, res, err)
 						// exit on error
