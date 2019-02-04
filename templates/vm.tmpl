@@ -30,5 +30,5 @@ Benchmark: {{.Benchmark}}
 
 {{define "VMS"}}
 APEL-cloud-message: v0.4
-{{range vms}} VM {{end}}
+{{range .Vms}} {{template "VM" .}} {{end}}
 {{end}}
