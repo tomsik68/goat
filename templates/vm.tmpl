@@ -1,5 +1,4 @@
 {{define "VM"}}
-APEL-cloud-message: v0.4
 VMUUID: {{.VMUUID}}
 SiteName: {{.SiteName}}
 CloudComputeService: {{.CloudComputeService}}
@@ -27,4 +26,9 @@ CloudType: {{.CloudType}}
 BenchmarkType: {{.BenkmarkType}}
 Benchmark: {{.Benchmark}}
 %%
+{{end}}
+
+{{define "VMS"}}
+APEL-cloud-message: v0.4
+{{range vms}} VM {{end}}
 {{end}}
