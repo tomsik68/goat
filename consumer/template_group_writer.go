@@ -11,6 +11,7 @@ import (
 
 const (
 	templateFileExtension = "tmpl"
+	templateName          = "VMS"
 	filenameFormat        = "%014d"
 )
 
@@ -23,18 +24,16 @@ type TemplateGroupWriter struct {
 	outputDir    string
 	templatesDir string
 	countPerFile uint64
-	templateName string
 	template     *template.Template
 	records      []interface{}
 }
 
 // NewTemplateGroupWriter creates a new TemplateGroupWriter.
-func NewTemplateGroupWriter(outputDir, templatesDir, templateName string, countPerFile uint64) TemplateGroupWriter {
+func NewTemplateGroupWriter(outputDir, templatesDir string, countPerFile uint64) TemplateGroupWriter {
 	return TemplateGroupWriter{
 		outputDir:    outputDir,
 		templatesDir: templatesDir,
 		countPerFile: countPerFile,
-		templateName: templateName,
 		template:     nil,
 		records:      make([]interface{}, countPerFile),
 	}
@@ -72,7 +71,7 @@ func trySendError(ctx context.Context, res chan<- Result, err error) {
 	}
 }
 
-func writeFile(data interface{}, recordCount uint64, template *template.Template, filename, templateName string) error {
+func writeFile(data interface{}, recordCount uint64, template *template.Template, filename string) error {
 	// open the file
 	file, err := os.Create(filename)
 	if err != nil {
@@ -115,7 +114,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 					if countInFile > 0 {
 						// but we have something to save!
 						templateData := vmsTemplateData{Vms: tgw.records}
-						err := writeFile(templateData, countInFile, tgw.template, path.Join(tgw.outputDir, path.Join(id, fmt.Sprintf(filenameFormat, filenameCounter))), tgw.templateName)
+						err := writeFile(templateData, countInFile, tgw.template, path.Join(tgw.outputDir, path.Join(id, fmt.Sprintf(filenameFormat, filenameCounter))))
 						if err != nil {
 							trySendError(ctx, res, err)
 						}
@@ -137,7 +136,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 				// if we already have this many records in the file
 				if countInFile == tgw.countPerFile {
 					templateData := vmsTemplateData{Vms: tgw.records}
-					err = writeFile(templateData, countInFile, tgw.template, path.Join(tgw.outputDir, path.Join(id, fmt.Sprintf(filenameFormat, filenameCounter))), tgw.templateName)
+					err = writeFile(templateData, countInFile, tgw.template, path.Join(tgw.outputDir, path.Join(id, fmt.Sprintf(filenameFormat, filenameCounter))))
 					if err != nil {
 						trySendError(ctx, res, err)
 					}
