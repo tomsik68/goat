@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	templateFileExtension = "tmpl"
-	templateName          = "VMS"
-	filenameFormat        = "%014d"
+	templateFileName = "vms.tmpl"
+	templateName     = "VMS"
+	filenameFormat   = "%014d"
 )
 
 type vmsTemplateData struct {
@@ -53,7 +53,7 @@ func (tgw *TemplateGroupWriter) initTemplates() error {
 		return nil
 	}
 
-	template, err := template.ParseGlob(path.Join(tgw.templatesDir, fmt.Sprintf("*.%s", templateFileExtension)))
+	template, err := template.ParseGlob(path.Join(tgw.templatesDir, templateFileName))
 	tgw.template = template
 	return err
 }
