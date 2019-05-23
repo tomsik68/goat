@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	templateFileName = "vms.tmpl"
+	templateFileName = "vm.tmpl"
 	templateName     = "VMS"
 	filenameFormat   = "%014d"
 )
