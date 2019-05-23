@@ -3,10 +3,11 @@ package consumer
 import (
 	"context"
 	"fmt"
-	"github.com/goat-project/goat/consumer/wrapper"
 	"os"
 	"path"
 	"text/template"
+
+	"github.com/goat-project/goat/consumer/wrapper"
 )
 
 const (
