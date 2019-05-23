@@ -95,7 +95,8 @@ func (tgw TemplateGroupWriter) writeFile(id string, countInFile, filenameCounter
 
 // Consume converts each record to template and writes it to file.
 // Multiple records may be written into a single file.
-func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <-chan wrapper.RecordWrapper) (ResultsChannel, error) {
+func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string,
+	records <-chan wrapper.RecordWrapper) (ResultsChannel, error) {
 	res := make(chan Result)
 
 	if err := ensureDirectoryExists(path.Join(tgw.outputDir, id)); err != nil {
