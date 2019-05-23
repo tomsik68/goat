@@ -19,7 +19,8 @@ type vmsTemplateData struct {
 	Vms []interface{}
 }
 
-// TemplateGroupWriter converts each record to template and writes it to file. Multiple records may be written into a single file.
+// TemplateGroupWriter converts each record to template and writes it to file.
+// Multiple records may be written into a single file.
 type TemplateGroupWriter struct {
 	outputDir    string
 	templatesDir string
@@ -92,7 +93,8 @@ func (tgw TemplateGroupWriter) writeFile(id string, countInFile, filenameCounter
 	return file.Close()
 }
 
-// Consume converts each record to template and writes it to file. Multiple records may be written into a single file.
+// Consume converts each record to template and writes it to file.
+// Multiple records may be written into a single file.
 func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <-chan wrapper.RecordWrapper) (ResultsChannel, error) {
 	res := make(chan Result)
 
