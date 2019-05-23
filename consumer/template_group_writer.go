@@ -66,7 +66,7 @@ func trySendError(ctx context.Context, res chan<- Result, err error) {
 			// error sent successfully
 			return
 		case <-ctx.Done():
-			// goroutine has been cancelled
+			// goroutine has been canceled
 			return
 		}
 	}
@@ -152,7 +152,7 @@ func (tgw TemplateGroupWriter) Consume(ctx context.Context, id string, records <
 					countInFile = 0
 				}
 			case <-ctx.Done():
-				// goroutine has been cancelled
+				// goroutine has been canceled
 				return
 			}
 		}
