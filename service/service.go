@@ -11,14 +11,10 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	vmPerFile = 500
-)
-
 // Serve starts grpc server on ip:port, optionally using tls. If *tls == true, then *certFile and
 // *keyFile must be != null
 func Serve(ip *string, port *uint, tls *bool, certFile *string, keyFile *string, outDir *string,
-	templatesDir *string) error {
+	templatesDir *string, vmPerFile *uint64) error {
 	server, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *ip, *port))
 	if err != nil {
 		return err
